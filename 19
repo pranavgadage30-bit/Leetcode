@@ -1,0 +1,88 @@
+You are given an n x n binary matrix grid where 1 represents land and 0 represents water.
+
+An island is a 4-directionally connected group of 1's not connected to any other 1's. There are exactly two islands in grid.
+
+You may change 0's to 1's to connect the two islands to form one island.
+
+Return the smallest number of 0's you must flip to connect the two islands.
+
+ 
+
+Example 1:
+
+Input: grid = [[0,1],[1,0]]
+Output: 1
+Example 2:
+
+Input: grid = [[0,1,0],[0,0,0],[0,0,1]]
+Output: 2
+Example 3:
+
+Input: grid = [[1,1,1,1,1],[1,0,0,0,1],[1,0,1,0,1],[1,0,0,0,1],[1,1,1,1,1]]
+Output: 1
+ 
+
+Constraints:
+
+n == grid.length == grid[i].length
+2 <= n <= 100
+grid[i][j] is either 0 or 1.
+There are exactly two islands in grid.
+
+from collections import deque
+
+class Solution(object):
+    def shortestBridge(self, grid):
+        """
+        :type grid: List[List[int]]
+        :rtype: int
+        """
+        n = len(grid)
+        q = deque()
+        visited = set()
+
+        directions = [(1,0), (-1,0), (0,1), (0,-1)]
+
+        # DFS to mark the first island
+        def dfs(r, c):
+            if (r < 0 or r >= n or c < 0 or c >= n or
+                (r, c) in visited or grid[r][c] == 0):
+                return
+
+            visited.add((r, c))
+            q.append((r, c))
+
+            for dr, dc in directions:
+                dfs(r + dr, c + dc)
+
+        # Find the first island
+        found = False
+        for i in range(n):
+            if found:
+                break
+            for j in range(n):
+                if grid[i][j] == 1:
+                    dfs(i, j)
+                    found = True
+                    break
+
+        # Multi-source BFS
+        steps = 0
+
+        while q:
+            for _ in range(len(q)):
+                r, c = q.popleft()
+
+                for dr, dc in directions:
+                    nr, nc = r + dr, c + dc
+
+                    if (0 <= nr < n and 0 <= nc < n and
+                        (nr, nc) not in visited):
+
+                        if grid[nr][nc] == 1:
+                            return steps
+
+                        visited.add((nr, nc))
+                        q.append((nr, nc))
+
+            steps += 1
